@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><title>Chat</title></head>
+<body>
+    <h2>Chat Room</h2>
+    <div id="chatBox" style="border:1px solid black;height:300px;overflow:auto;"></div>
+   <label for="sender">Your name:</label><br>
+<input type="text" id="sender" name="sender" placeholder="Your name"><br>
+    <label for="message">Your message:</label><br>
+<input type="text" id="message" name="message" placeholder="Your message"><br>
+    <button onclick="sendMessage()">Send</button>
+    <script>
+        async function sendMessage() {
+            const sender = document.getElementById("sender").value;
+            const message = document.getElementById("message").value;
+            const formData = new FormData();
+            formData.append("sender", sender);
+            formData.append("message", message);
+            await fetch("http://127.0.0.1:8000/send_message/", {
+                method: "POST",
+                body: formData
+            });
+     await loadMessages();
+        }
+
+        async function loadMessages() {
+            const res = await fetch("http://127.0.0.1:8000/get_messages/");
+            const msgs = await res.json();
+            const box = document.getElementById("chatBox");
+            box.innerHTML = msgs.map(msg => `<p><b>${msg.sender}:</b> ${msg.message}</p>`).join("");
+        }
+
+        setInterval(loadMessages, 2000);
+    </script>
+</body>
+</html>

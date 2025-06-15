@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><title>Announcements</title></head>
+<body>
+    <h2>Post Announcement</h2>
+    <form id="postForm">
+      <label for="content">Type announcement here:</label><br>
+<textarea id="content" name="content" rows="4" cols="50" placeholder="Type announcement here..."></textarea><br>
+
+        <button type="submit">Post</button>
+    </form>
+
+    <h3>Recent Announcements</h3>
+    <div id="annBox"></div>
+
+    <script>
+        document.getElementById("postForm").onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            await fetch("http://127.0.0.1:8000/add_announcement/", {
+                method: "POST", body: formData
+            });
+           await loadAnnouncements();
+
+        };
+
+        async function loadAnnouncements() {
+            const res = await fetch("http://127.0.0.1:8000/announcements/");
+            const anns = await res.json();
+            const box = document.getElementById("annBox");
+            box.innerHTML = anns.map(a => `<p>${new Date(a.timestamp).toLocaleString()}: ${a.content}</p>`).join("");
+        }
+
+        loadAnnouncements();
+    </script>
+</body>
+</html>

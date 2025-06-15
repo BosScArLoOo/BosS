@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Simple Chat & PDF App</title>
+</head>
+<body>
+    <h1>Upload PDF</h1>
+    <form id="uploadForm">
+<label for="title">عنوان الـ PDF:</label>
+<input type="text" id="title" name="title" placeholder="PDF Title" required />
+        <button type="submit">Upload</button>
+    </form>
+    <div id="uploadMessage"></div>
+
+    <h1>Chat Messages</h1>
+    <div id="messages"></div>
+
+    <script>
+        // رفع ملف PDF
+        document.getElementById('uploadForm').onsubmit = async function (e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            const res = await fetch('/upload_pdf/', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await res.json();
+            document.getElementById('uploadMessage').innerText = data.message || 'Error uploading';
+            form.reset();
+        };
+
+        // جلب وعرض الرسائل من الدردشة (مثلاً من /chat/get_messages/)
+        async function loadMessages() {
+            const res = await fetch('/chat/get_messages/');
+            const messages = await res.json();
+
+            const container = document.getElementById('messages');
+            container.innerHTML = '';
+            messages.forEach(msg => {
+                const el = document.createElement('div');
+                el.textContent = `[${new Date(msg.timestamp).toLocaleTimeString()}] ${msg.sender}: ${msg.message}`;
+                container.appendChild(el);
+            });
+        }
+
+        // تحديث الرسائل كل 5 ثواني
+        loadMessages();
+        setInterval(loadMessages, 5000);
+    </script>
+</body>
+</html>
